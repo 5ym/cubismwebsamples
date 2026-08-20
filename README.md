@@ -1,142 +1,43 @@
-[English](README.md) / [日本語](README.ja.md)
+# cubismwebsamples
 
----
+[Cubism Web Samples](https://github.com/Live2D/CubismWebSamples) のデモを GitHub Pages に公開するためだけのリポジトリ。
 
-# Cubism Web Samples
+公開先: https://5ym.github.io/cubismwebsamples/
 
-This is a sample implementation of an application that displays models output by Live2D Cubism Editor.
+## 何が入っているか
 
-It is used in conjunction with the Cubism Web Framework and Live2D Cubism Core.
-
-
-## License
-
-Please check the [license](LICENSE.md) before using this SDK.
-
-
-## Notices
-
-Please check the [notices](NOTICE.md) before using this SDK.
-
-
-## Compatibility with Cubism 5 new features and previous Cubism SDK versions
-
-This SDK is compatible with Cubism 5.  
-For SDK compatibility with new features in Cubism 5 Editor, please refer to [here](https://docs.live2d.com/en/cubism-sdk-manual/cubism-5-new-functions/).  
-For compatibility with previous versions of Cubism SDK, please refer to [here](https://docs.live2d.com/en/cubism-sdk-manual/compatibility-with-cubism-5/).
-
-
-
-## Directory structure
+SDK のソースコードは持っていない。持っているのはワークフローだけ。
 
 ```
-.
-├─ .vscode          # Project settings directory for Visual Studio Code
-├─ Core             # Directory containing Live2D Cubism Core
-├─ Framework        # Directory containing source code such as rendering and animation functions
-└─ Samples
-   ├─ Resources     # Directory containing resources such as model files and images
-   └─ TypeScript    # Directory containing TypeScript sample projects
+.github/workflows/pages.yml   # SDK を取得してビルドし、Pages に配信する
 ```
 
+`pages.yml` が実行時に [Cubism SDK for Web](https://www.live2d.com/download/cubism-sdk/download-web/) の
+公式配布 zip を取得し、`Samples/TypeScript/Demo` をビルドして `dist` をそのまま Pages の
+ルートとして配信する。
 
-## Live2D Cubism Core for Web
+GitHub の [Live2D/CubismWebSamples](https://github.com/Live2D/CubismWebSamples) には
+Cubism Core の本体 (`Core/live2dcubismcore.js`) が含まれておらず、リポジトリを clone しただけでは
+ビルドできない。一方で公式配布 zip には Core / Framework / Samples がすべて揃っているため、
+zip だけを唯一の取得元にしている。
 
-A library for loading the model.
+## バージョンを上げる
 
-This repository does not manage Cubism Core.
-Download the Cubism SDK for Web from [here](https://www.live2d.com/download/cubism-sdk/download-web/) and copy the files in the Core directory.
+`pages.yml` の `CUBISM_SDK_VERSION` を書き換えて develop に push するだけ。
 
+```yaml
+env:
+  CUBISM_SDK_VERSION: "5-r.5"
+```
 
-## Development environment construction
+指定できる値は [Live2D/CubismWebSamples のタグ](https://github.com/Live2D/CubismWebSamples/tags)
+と同じ形式 (`5-r.5`, `5-r.4`, ...)。Core と Framework と Resources のバージョンが zip 内で
+揃っているので、組み合わせのズレ (Core が古くて新しい `.moc3` を読めない等) は起きない。
 
-1. Install [Node.js] and [Visual Studio Code]
-1. Open **the top directory of this SDK** in Visual Studio Code and install the recommended extensions
-    * In addition to pop-up notifications, you can check the others by typing `@recommended` from the Extensions tab
+## ライセンス
 
-### Operation check of sample demo
+このリポジトリは Live2D の配布物を一切含まない。デモに含まれるコードやモデルの利用条件は
+配布元のライセンスに従う。
 
-Enter `>Tasks: Run Task` in the command palette (*View > Command Palette...*) to display the task list.
-
-1. Select `npm: install - Samples/TypeScript/Demo` from the task list to download the dependent packages
-1. Select `npm: build - Samples/TypeScript/Demo` from the task list to build the sample demo
-1. Select `npm: serve - Samples/TypeScript/Demo` from the task list to start the simple server for operation check
-1. Enter `http://localhost:5000/Samples/TypeScript/Demo/` in the URL field of your browser to access it
-1. Enter `>Tasks: Terminate Task` from the command palette and select `npm: serve` to terminate the simple server
-
-For other tasks, see [README.md](Samples/TypeScript/README.md) of the sample project.
-
-NOTE: Settings for debugging are described in `.vscode/tasks.json`.
-
-### Project debugging
-
-Open **the top directory of this SDK** in Visual Studio Code and enter the *F5* key to start Debugger for Chrome.
-
-You can place breakpoints in Visual Studio Code to debug in conjunction with the Chrome browser.
-
-NOTE: Settings for debugging are described in `.vscode/launch.json`.
-
-
-## SDK manual
-
-[Cubism SDK Manual](https://docs.live2d.com/cubism-sdk-manual/top/)
-
-
-## Changelog
-
-Please refer to [CHANGELOG.md](CHANGELOG.md) for the changelog of this repository.
-
-
-## Development environment
-
-### Node.js
-
-* 21.5.0
-* 20.11.0
-
-
-## Operation environment
-
-| Platform | Browser | Version |
-| --- | --- | --- |
-| Android | Google Chrome | 120.0.6099.210 |
-| Android | Microsoft Edge | 120.0.2210.115 |
-| Android | Mozilla Firefox | 121.1.0 |
-| iOS / iPadOS | Google Chrome | 120.0.6099.119 |
-| iOS / iPadOS | Microsoft Edge | 120.0.2210.126 |
-| iOS / iPadOS | Mozilla Firefox | 121.2 |
-| iOS / iPadOS | Safari | 17.2 |
-| macOS | Google Chrome | 120.0.6099.216 |
-| macOS | Microsoft Edge | 120.0.2210.121 |
-| macOS | Mozilla Firefox | 121.0.1 |
-| macOS | Safari | 17.2.1 |
-| Windows | Google Chrome | 120.0.6099.217 |
-| Windows | Microsoft Edge | 120.0.2210.121 |
-| Windows | Mozilla Firefox | 121.0.1 |
-
-Note: You can start the server for operation check by running the `serve` script of `./Samples/TypeScript/Demo/package.json`.
-
-
-## Contributing
-
-There are many ways to contribute to the project: logging bugs, submitting pull requests on this GitHub, and reporting issues and making suggestions in Live2D Community.
-
-### Forking And Pull Requests
-
-We very much appreciate your pull requests, whether they bring fixes, improvements, or even new features. Note, however, that the wrapper is designed to be as lightweight and shallow as possible and should therefore only be subject to bug fixes and memory/performance improvements. To keep the main repository as clean as possible, create a personal fork and feature branches there as needed.
-
-### Bugs
-
-We are regularly checking issue-reports and feature requests at Live2D Community. Before filing a bug report, please do a search in Live2D Community to see if the issue-report or feature request has already been posted. If you find your issue already exists, make relevant comments and add your reaction.
-
-### Suggestions
-
-We're also interested in your feedback for the future of the SDK. You can submit a suggestion or feature request at Live2D Community. To make this process more effective, we're asking that you include more information to help define them more clearly.
-
-
-## Forum
-
-If you want to suggest or ask questions about how to use the Cubism SDK between users, please use the forum.
-
-- [Live2D Creator's Forum](https://community.live2d.com/)
-- [Live2D 公式クリエイターズフォーラム (Japanese)](https://creatorsforum.live2d.com/)
+* [Live2D Open Software License Agreement](https://www.live2d.com/eula/live2d-open-software-license-agreement_ja.html) (Framework / Samples)
+* [Live2D Proprietary Software License Agreement](https://www.live2d.com/eula/live2d-proprietary-software-license-agreement_ja.html) (Cubism Core)

@@ -1,53 +1,67 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+# Cubism Web Samples のデモを GitHub Pages に公開するワークフロー。
+# このリポジトリは SDK のソースを持たず、ビルド時に公式配布物を取得する。
+name: Deploy Cubism Web Samples to Pages
 
 on:
-  # Runs on pushes targeting the default branch
   push:
     branches: ["develop"]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+# デプロイは 1 本ずつ。実行中のものはキャンセルしない。
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
+env:
+  # 公開する Cubism SDK for Web のバージョン。上げるときはここだけ書き換える。
+  # 一覧: https://github.com/Live2D/CubismWebSamples/tags
+  CUBISM_SDK_VERSION: "5-r.5"
+
 jobs:
-  # Single deploy job since we're just deploying
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: 'Samples/TypeScript/Demo'
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        with:
-          submodules: recursive
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v6
+
+      # 公式配布 zip には Core / Framework / Samples が揃っている。
+      # Core のバイナリは GitHub のリポジトリには含まれないため、こちらから取得する。
+      - name: Download Cubism SDK for Web
+        run: |
+          curl -fsSL --retry 3 --retry-delay 5 -o cubism-sdk.zip \
+            "https://cubism.live2d.com/sdk-web/bin/CubismSdkForWeb-${CUBISM_SDK_VERSION}.zip"
+          unzip -q cubism-sdk.zip
+          mv CubismSdkForWeb-* sdk
+          test -f sdk/Core/live2dcubismcore.js
+
       - uses: actions/setup-node@v7
         with:
-          node-version: 18
-      - run: npm ci
-      - run: npm run build
-      - name: Setup Pages
-        uses: actions/configure-pages@v6
+          node-version: 22
+          cache: npm
+          cache-dependency-path: sdk/Samples/TypeScript/Demo/package-lock.json
+
+      # Project Pages はサブパス配信なので vite の base を合わせる
+      # (base_path はユーザーサイトなら空、プロジェクトサイトなら /<repo>)。
+      - name: Build sample demo
+        working-directory: sdk/Samples/TypeScript/Demo
+        run: |
+          npm ci
+          npm run build:prod -- --base="${{ steps.pages.outputs.base_path }}/"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          # Upload entire repository
-          path: '.'
+          path: sdk/Samples/TypeScript/Demo/dist
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
