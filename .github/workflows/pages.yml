@@ -48,6 +48,21 @@ jobs:
           cache: npm
           cache-dependency-path: sdk/Samples/TypeScript/Demo/package-lock.json
 
+      # サンプルは '../../Resources/' のようにドキュメントから 2 階層上を
+      # 参照している。サイト直下配信ならブラウザの正規化で辿り着くが、
+      # Project Pages はサブパス配信なのでユーザーページ側を指してしまう。
+      # 実体は vite の public に入るので、自分自身からの相対パスへ直す。
+      # SDK 側の記述が変わったら grep で気付けるように検証してから置換する。
+      - name: Fix resource paths for sub-path hosting
+        working-directory: sdk/Samples/TypeScript/Demo
+        run: |
+          grep -q "^export const ResourcesPath = '\.\./\.\./Resources/';$" src/lappdefine.ts
+          grep -q "^export const ShaderPath = '\.\./\.\./Framework/Shaders/WebGL/';$" src/lappdefine.ts
+          sed -i \
+            -e "s|'\.\./\.\./Resources/'|'./Resources/'|" \
+            -e "s|'\.\./\.\./Framework/Shaders/WebGL/'|'./Framework/Shaders/WebGL/'|" \
+            src/lappdefine.ts
+
       # Project Pages はサブパス配信なので vite の base を合わせる
       # (base_path はユーザーサイトなら空、プロジェクトサイトなら /<repo>)。
       - name: Build sample demo

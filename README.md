@@ -21,6 +21,17 @@ Cubism Core の本体 (`Core/live2dcubismcore.js`) が含まれておらず、�
 ビルドできない。一方で公式配布 zip には Core / Framework / Samples がすべて揃っているため、
 zip だけを唯一の取得元にしている。
 
+## サブパス配信の都合で 1 箇所だけ書き換えている
+
+サンプルはリソースを `'../../Resources/'` のように参照しており、これはサイト直下に
+置かれている前提のパス。`https://5ym.github.io/cubismwebsamples/` のような
+Project Pages ではユーザーページ側 (`https://5ym.github.io/Resources/`) を指してしまうため、
+ビルド前に `src/lappdefine.ts` の `ResourcesPath` と `ShaderPath` を自分自身からの
+相対パスへ書き換えている。実体は vite の `public` に入るのでこれで解決する。
+
+書き換え対象が SDK 側で変わった場合は `grep` に引っかかってワークフローが失敗するので、
+黙って壊れたサイトが配信されることはない。
+
 ## バージョンを上げる
 
 `pages.yml` の `CUBISM_SDK_VERSION` を書き換えて develop に push するだけ。
