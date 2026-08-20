@@ -5,6 +5,8 @@ name: Deploy Cubism Web Samples to Pages
 on:
   push:
     branches: ["develop"]
+  pull_request:
+    branches: ["develop"]
   workflow_dispatch:
 
 permissions:
@@ -12,9 +14,8 @@ permissions:
   pages: write
   id-token: write
 
-# デプロイは 1 本ずつ。実行中のものはキャンセルしない。
 concurrency:
-  group: "pages"
+  group: "pages-${{ github.ref }}"
   cancel-in-progress: false
 
 env:
@@ -23,10 +24,8 @@ env:
   CUBISM_SDK_VERSION: "5-r.5"
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  # デプロイと分けてあるので、develop 以外のブランチや PR でもビルドの検証はできる。
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Pages
@@ -62,6 +61,15 @@ jobs:
         with:
           path: sdk/Samples/TypeScript/Demo/dist
 
+  deploy:
+    needs: build
+    # github-pages 環境はデフォルトブランチからのデプロイのみ許可されている。
+    if: github.ref_name == github.event.repository.default_branch
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
