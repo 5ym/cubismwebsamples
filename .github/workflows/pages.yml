@@ -44,7 +44,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 24.22.1
+          node-version: 26.12.1
           cache: npm
           cache-dependency-path: sdk/Samples/TypeScript/Demo/package-lock.json
 
